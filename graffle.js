@@ -74,8 +74,20 @@ window.onload = function () {
     var dragger = function () {
         this.title.hide();
 
+        //Hide from connections
         for (var kk in this.moves) {
             this.moves[kk].circle_text.hide();
+            }
+
+        //Hide to connections
+        for (var k in shapes) {
+            for (kk in shapes[k].moves)
+                {
+                if(kk==this.id)
+                    {
+                    shapes[k].moves[kk].circle_text.hide();
+                    }
+                }
             }
 
         this.ox = this.type == "rect" ? this.attr("x") : this.attr("cx");
@@ -96,13 +108,27 @@ window.onload = function () {
             //alert(this.title.getBBox().x)
             this.title.attr({x: this.getBBox().x+10, y: this.getBBox().y+20})
 
+            //Show from connections
             for (var kk in this.moves) {
                 this.moves[kk].circle_text.show().attr({x: this.moves[kk].circle.getBBox().x+12, y: this.moves[kk].circle.getBBox().y+13});
                 }
-            //this.counts.attr({circles[k][kk].getBBox().x+12, circles[k][kk].getBBox().y+13})
-
-            //titles[this.id]
+            //Show to connections
+            for (var k in shapes) {
+                for (kk in shapes[k].moves)
+                    {
+                    if(kk==this.id)
+                        {
+                        shapes[k].moves[kk].circle_text.show().attr({x: shapes[k].moves[kk].circle.getBBox().x+12, y: shapes[k].moves[kk].circle.getBBox().y+13});
+                        }
+                    }
+                }
         },
+
+        get_reverse_move_num = function (to_id) {
+
+        },
+
+
         r = Raphael("holder", 640, 480),
 
         connections = [];
@@ -170,6 +196,7 @@ window.onload = function () {
             shapes[k].attr({width: titles[k].getBBox().width+20});
             shapes[k].title=titles[k]
             shapes[k].id=k
+            shapes[k].moves = []
             //alert();
             i++;
             };
@@ -182,11 +209,11 @@ window.onload = function () {
     };
 
     for (var k in issues_moves) {
-        shapes[k].moves = []
         for (var kk in issues_moves[k]) {
             var conn = r.connection(shapes[k], shapes[kk], "#fff", "#fff|3");
             var attr = {font: "9pt Helvetica", opacity: 1, 'font-weight': 'bold'};
-            conn.circle_text = r.text(conn.circle.getBBox().x+12, conn.circle.getBBox().y+13, issues_moves[k][kk]).attr(attr).attr({fill: shapes[k].attr('stroke')});
+            var circle_bbox = conn.circle.getBBox();
+            conn.circle_text = r.text(circle_bbox.x+12, circle_bbox.y+13, issues_moves[k][kk]).attr(attr).attr({fill: "#000"}) //shapes[k].attr('stroke')
             connections.push(conn);
             
             shapes[k].moves[kk] = conn
