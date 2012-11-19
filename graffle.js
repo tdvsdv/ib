@@ -158,6 +158,7 @@ window.onload = function () {
         issues_moves[6][12] = 9;
         issues_moves[12] = [];
         issues_moves[12][6] = 17;
+        issues_moves[12][12] = 17;
 
         issues_moves[5] = [];
         issues_moves[5][12] = 9;
@@ -220,15 +221,23 @@ window.onload = function () {
 
     for (var k in issues_moves) {
         for (var kk in issues_moves[k]) {
-            if(typeof shapes[kk].moves[k] == 'undefined')
+            if(k==kk)
                 {
-                var conn = r.connection(shapes[k], shapes[kk], "#fff", "#fff|3");
-                var attr = {font: "9pt Helvetica", opacity: 1, 'font-weight': 'bold'};
-                var circle_bbox = conn.circle.getBBox();
-                conn.circle_text = r.text(circle_bbox.x+12, circle_bbox.y+13, issues_moves[k][kk]+get_reverse_move_num(kk, k)).attr(attr).attr({fill: "#000"}) //shapes[k].attr('stroke')
-                connections.push(conn);
-                
-                shapes[k].moves[kk] = conn
+                r.circle(shapes[k].getBBox().x+shapes[k].getBBox().width+10, shapes[k].getBBox().y+shapes[k].getBBox().height/2, 13).attr({fill: "#ccc", stroke: "#fff", "stroke-width": 2})
+                shapes[k].attr({width: shapes[k].getBBox().width+30});
+                }
+            else
+                {
+                if(typeof shapes[kk].moves[k] == 'undefined')
+                    {
+                    var conn = r.connection(shapes[k], shapes[kk], "#fff", "#fff|3");
+                    var attr = {font: "9pt Helvetica", opacity: 1, 'font-weight': 'bold'};
+                    var circle_bbox = conn.circle.getBBox();
+                    conn.circle_text = r.text(circle_bbox.x+12, circle_bbox.y+13, issues_moves[k][kk]+get_reverse_move_num(kk, k)).attr(attr).attr({fill: "#000"}) //shapes[k].attr('stroke')
+                    connections.push(conn);
+                    
+                    shapes[k].moves[kk] = conn
+                    }
                 }
             }
     };
