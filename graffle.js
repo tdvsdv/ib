@@ -144,13 +144,25 @@ window.onload = function () {
 
             if(!this.data('moved'))
                 {
+
+                if($('body').data('last_lighted') && $('body').data('last_lighted') != this)
+                    {
+
+                    if(typeof $('body').data('last_lighted').moves[this.id] == 'undefined' && typeof this.moves[$('body').data('last_lighted').id] == 'undefined')
+                        {
+                        build_connection($('body').data('last_lighted'), this);
+                        }
+                    }
+
                 if(!this.data('lighted'))
                     {
                     //this.attr({"stroke-width": 4})
                     var highlight = this.clone().toBack()
                     this.highlight = highlight.attr({x: this.getBBox().x-2, y: this.getBBox().y-2, width: this.getBBox().width+4, height: this.getBBox().height+4,  "stroke-width": 4,  opacity: 0.2});
                     
-                    this.data('lighted', true)
+                    this.data('lighted', true);
+                    $('body').data('last_lighted', this);
+
                     }
                 else
                     {
@@ -158,6 +170,7 @@ window.onload = function () {
                     //this.attr({"stroke-width": 2})
                     this.highlight.remove();
                     this.data('lighted', false);
+                    $('body').data('last_lighted', false);
                     }
                 }
             this.data('moved', false);
@@ -173,6 +186,21 @@ window.onload = function () {
                 else
                     return issues_moves[from_id][to_id];
                 }
+        },
+
+
+        build_connection = function (from_obj, to_obj) {
+            var conn = r.connection(from_obj, to_obj, "#fff", "#fff|3");
+            var attr = {font: "9pt Helvetica", opacity: 1, 'font-weight': 'bold'};
+            var circle_bbox = conn.circle.getBBox();
+            if(typeof issues_moves[from_obj.id][to_obj.id] == 'number')
+                var text = issues_moves[from_obj.id][to_obj.id]+get_reverse_move_num(to_obj.id, from_obj.id)
+            else
+                var text = 0
+            conn.circle_text = r.text(circle_bbox.x+12, circle_bbox.y+13, text).attr(attr).attr({fill: "#000"}) //shapes[k].attr('stroke')
+            connections.push(conn);
+                    
+            from_obj.moves[to_obj.id] = conn
         },
 
        /*light = function () {
@@ -277,13 +305,7 @@ window.onload = function () {
                 {
                 if(typeof shapes[kk].moves[k] == 'undefined')
                     {
-                    var conn = r.connection(shapes[k], shapes[kk], "#fff", "#fff|3");
-                    var attr = {font: "9pt Helvetica", opacity: 1, 'font-weight': 'bold'};
-                    var circle_bbox = conn.circle.getBBox();
-                    conn.circle_text = r.text(circle_bbox.x+12, circle_bbox.y+13, issues_moves[k][kk]+get_reverse_move_num(kk, k)).attr(attr).attr({fill: "#000"}) //shapes[k].attr('stroke')
-                    connections.push(conn);
-                    
-                    shapes[k].moves[kk] = conn
+                    build_connection(shapes[k], shapes[kk])
                     }
                 }
             }
