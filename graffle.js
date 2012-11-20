@@ -90,11 +90,22 @@ window.onload = function () {
                 }
             }
 
+        //Hide self moves
+        if(typeof this.circle != 'undefined')
+            {
+            this.circle.hide();
+            this.circle_text.hide();
+            }
+
         this.ox = this.type == "rect" ? this.attr("x") : this.attr("cx");
         this.oy = this.type == "rect" ? this.attr("y") : this.attr("cy");
         this.animate({"fill-opacity": .2}, 500);
     },
         move = function (dx, dy) {
+            this.data('moved', true);
+            if(typeof this.highlight != 'undefined')
+               { this.highlight.remove();}
+
             var att = this.type == "rect" ? {x: this.ox + dx, y: this.oy + dy} : {cx: this.ox + dx, cy: this.oy + dy};
             this.attr(att);
             for (var i = connections.length; i--;) {
@@ -105,6 +116,7 @@ window.onload = function () {
         up = function () {
             this.title.show();
             this.animate({"fill-opacity": 0}, 500);
+
             //alert(this.title.getBBox().x)
             this.title.attr({x: this.getBBox().x+10, y: this.getBBox().y+20})
 
@@ -122,6 +134,33 @@ window.onload = function () {
                         }
                     }
                 }
+
+            //Hide self moves
+            if(typeof this.circle != 'undefined')
+                {
+                this.circle.show().attr({cx: this.getBBox().x+this.getBBox().width-20, cy: this.getBBox().y+this.getBBox().height/2});
+                this.circle_text.show().attr({x: this.getBBox().x+this.getBBox().width-20, y: this.getBBox().y+this.getBBox().height/2});
+                }
+
+            if(!this.data('moved'))
+                {
+                if(!this.data('lighted'))
+                    {
+                    //this.attr({"stroke-width": 4})
+                    var highlight = this.clone().toBack()
+                    this.highlight = highlight.attr({x: this.getBBox().x-2, y: this.getBBox().y-2, width: this.getBBox().width+4, height: this.getBBox().height+4,  "stroke-width": 4,  opacity: 0.2});
+                    
+                    this.data('lighted', true)
+                    }
+                else
+                    {
+
+                    //this.attr({"stroke-width": 2})
+                    this.highlight.remove();
+                    this.data('lighted', false);
+                    }
+                }
+            this.data('moved', false);
         },
 
         get_reverse_move_num = function (from_id, to_id) {
@@ -135,6 +174,10 @@ window.onload = function () {
                     return issues_moves[from_id][to_id];
                 }
         },
+
+       /*light = function () {
+            alert('flags');
+        },*/
 
 
         r = Raphael("holder", 640, 480),
@@ -158,7 +201,7 @@ window.onload = function () {
         issues_moves[6][12] = 9;
         issues_moves[12] = [];
         issues_moves[12][6] = 17;
-        issues_moves[12][12] = 17;
+        issues_moves[12][12] = 21;
 
         issues_moves[5] = [];
         issues_moves[5][12] = 9;
@@ -201,14 +244,16 @@ window.onload = function () {
                     var y = 10;
                 }
 
-            shapes[k]=r.rect(x, y, 60, 40, 10);
-            attr = {font: "10pt Helvetica", opacity: 1};
+            attr = {font: "10pt Helvetica", opacity: 1};  
             titles[k] = r.text(x+10, y+20, statuses[k]).attr(attr).attr({fill: "#fff"}).attr({'text-anchor': 'start'});
+            shapes[k]=r.rect(x, y, 60, 40, 10);
+            
+
             shapes[k].attr({width: titles[k].getBBox().width+20});
-            shapes[k].title=titles[k]
-            shapes[k].id=k
-            shapes[k].moves = []
-            //alert();
+            shapes[k].title=titles[k];
+            shapes[k].id=k;
+            shapes[k].moves = [];
+            //shapes[k].click(light);
             i++;
             };
 
@@ -223,8 +268,10 @@ window.onload = function () {
         for (var kk in issues_moves[k]) {
             if(k==kk)
                 {
-                r.circle(shapes[k].getBBox().x+shapes[k].getBBox().width+10, shapes[k].getBBox().y+shapes[k].getBBox().height/2, 13).attr({fill: "#ccc", stroke: "#fff", "stroke-width": 2})
+                shapes[k].circle = r.circle(shapes[k].getBBox().x+shapes[k].getBBox().width+10, shapes[k].getBBox().y+shapes[k].getBBox().height/2, 13).attr({fill: "#ccc", stroke: "#fff", "stroke-width": 2})
                 shapes[k].attr({width: shapes[k].getBBox().width+30});
+                var attr = {font: "9pt Helvetica", opacity: 1, 'font-weight': 'bold'};
+                shapes[k].circle_text =  r.text(shapes[k].circle.getBBox().x+12, shapes[k].circle.getBBox().y+13, issues_moves[k][kk]).attr(attr).attr({fill: "#000"})
                 }
             else
                 {
